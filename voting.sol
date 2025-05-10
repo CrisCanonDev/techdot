@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.8.0;
 // We have to specify what version of compiler this code will compile with
 
 contract Voting {
@@ -8,7 +8,6 @@ contract Voting {
   */
   
   mapping (bytes32 => uint8) public votesReceived;
-  mapping ()
   
   /* Solidity doesn't let you pass in an array of strings in the constructor (yet).
   We will use an array of bytes32 instead to store the list of candidates
@@ -27,35 +26,34 @@ contract Voting {
   deploy the contract to the blockchain. When we deploy the contract,
   we will pass an array of candidates who will be contesting in the election
   */
-  function Voting(bytes32[] candidateNames, uint durationInSeconds) {
+  constructor(bytes32[] memory candidateNames, uint durationInSeconds) {
     candidateList = candidateNames;
 
     //deadline
-    votingDeadline = now+ durationInSeconds;
+    votingDeadline = block.timestamp + durationInSeconds;
   }
 
   // This function returns the total votes a candidate has received so far
-  function totalVotesFor(bytes32 candidate) returns (uint8) {
-    if (validCandidate(candidate) == false) throw;
+  function totalVotesFor(bytes32 candidate) public view returns (uint8) {
+    require(validCandidate(candidate), "Invalid candidate");
     return votesReceived[candidate];
   }
 
   // This function increments the vote count for the specified candidate. This
   // is equivalent to casting a vote
-  function voteForCandidate(bytes32 candidate) {
+  function voteForCandidate(bytes32 candidate) public {
 
     // check deadline & if voted
-    require(now < votingDeadline);
-    require(!hasVoted[msg.sender]);
+    require(block.timestamp < votingDeadline);
+    require(!hasVoted[msg.sender], "You have already voted.");
+    require(validCandidate(candidate), "Invalid candidate.");
 
-    if (validCandidate(candidate) == false) throw;
     votesReceived[candidate] += 1;
-
     //set voted
     hasVoted[msg.sender] = true;
   }
 
-  function validCandidate(bytes32 candidate) returns (bool) {
+  function validCandidate(bytes32 candidate) public view returns (bool) {
     for(uint i = 0; i < candidateList.length; i++) {
       if (candidateList[i] == candidate) {
         return true;
@@ -66,7 +64,7 @@ contract Voting {
 
   //get winner
   function getWinner() public view returns (bytes32) {
-    require(now >= votingDeadline);
+    require(block.timestamp >= votingDeadline, "Voting is still ongoing...");
     bytes32 winner;
     uint8 highestVotes = 0;
 
