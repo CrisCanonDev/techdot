@@ -1,66 +1,194 @@
-$(document).ready(function () {
-	var cookie = readCookie('auth');
-	if (cookie != null) {
-		window.location = "/app";
-	}
-	//check cookie
-	function readCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-	}
-
-	//error hide
-	$(messagebox).hide()
-
-	$(login).click(function(){
-		if (($('#username').val()=="")) {
-			$(messagebox).show()
-			$(errormsg).text('Please Enter Username');
-		} else if (($('#password').val()=="")) {
-			$(messagebox).show()
-			$(errormsg).text('Please Enter valid Password');
-
-		} else {
-			$(messagebox).hide()
-			$.ajax({
-				url: "/login",
-				method: "post",
-				dataType: 'json',
-				contentType: 'application/json'	,
-				data: JSON.stringify({
-					"username": $('#username').val(),
-					"password": $('#password').val(),
-				}),
-				success: function (data) {
-					console.log(data.message);
-					$(messagebox).show()
-					$(errormsg).text('Redirecting...')
-					var d = new Date();
-				    d.setTime(d.getTime() + (1*24*60*60*100));
-				    var expires = "expires="+ d.toUTCString();
-				    document.cookie = 'auth' + "=" + data.message + ";" + expires + ";path=/";
-				    window.location = '/app';
-				},
-				statusCode: {
-			        500: function() {
-			        	$(messagebox).show()
-			        	console.log('error');
-			          	$(errormsg).text('Error Invalid Username/Password');
-			        }
-			      }
-				
-			 });//.done(function(msg){
-			// 	$(errormsg).text('Redirecting...');
-
-			// }).fail(function(e){
-			// 	$(errormsg).text(e);
-			// });
-		}
+const users = {
+	alice: "1234",
+	bob: "1234",
+	cathy: "1234",
+	Daniel: "1234"
+  };
+  
+  $(document).ready(function () {
+	$('#messagebox').hide();
+  
+	$('#login').click(function () {
+	  const username = $('#username').val();
+	  const password = $('#password').val();
+  
+	  if (users[username] && users[username] === password) {
+		$('#messagebox').hide();
+		$('.loginscreen').hide();
+		$('#votingBox').show();
+	  } else {
+		$('#messagebox').show();
+		$('#errormsg').text("Invalid username or password.");
+	  }
 	});
-});
+  });
+
+  async function vote(candidateHex) {
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
+	await provider.send("eth_requestAccounts", []);
+	const signer = provider.getSigner();
+  
+	const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+	const abi = [[
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32[]",
+					"name": "candidateNames",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "uint256",
+					"name": "durationInSeconds",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "constructor"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "candidateList",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getWinner",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"name": "hasVoted",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "candidate",
+					"type": "bytes32"
+				}
+			],
+			"name": "totalVotesFor",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "candidate",
+					"type": "bytes32"
+				}
+			],
+			"name": "validCandidate",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "candidate",
+					"type": "bytes32"
+				}
+			],
+			"name": "voteForCandidate",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"name": "votesReceived",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "votingDeadline",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	]];
+  
+	const contract = new ethers.Contract(contractAddress, abi, signer);
+  
+	try {
+	  const tx = await contract.voteForCandidate(candidateHex);
+	  await tx.wait();
+	  $('#vote-status').text("Vote submitted successfully!");
+	} catch (err) {
+	  $('#vote-status').text("Error: " + err.message);
+	}
+  }
