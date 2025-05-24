@@ -1,89 +1,205 @@
-
-
-
-$(document).ready(function() {
-$('.modal').modal();
-	// $.ajax({
- //    url: '/getaddress',
- //    method: 'post'
-	// }).done(function(){
-	// 	console.log('done');
-	// });
-
-
-	web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-	abi = JSON.parse('[{"constant":false,"inputs":[{"name":"candidate","type":"bytes32"}],"name":"totalVotesFor","outputs":[{"name":"","type":"uint8"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"candidate","type":"bytes32"}],"name":"validCandidate","outputs":[{"name":"","type":"bool"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"","type":"bytes32"}],"name":"votesReceived","outputs":[{"name":"","type":"uint8"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"x","type":"bytes32"}],"name":"bytes32ToString","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"candidateList","outputs":[{"name":"","type":"bytes32"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"candidate","type":"bytes32"}],"name":"voteForCandidate","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"contractOwner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"inputs":[{"name":"candidateNames","type":"bytes32[]"}],"payable":false,"type":"constructor"}]')
-	VotingContract = web3.eth.contract(abi);
-	contractInstance = VotingContract.at('0xa7fb89a3fe6927b6d272637b148775f6fee5a8cf');
-	// candidates = {"Rama": "candidate-1", "Nick": "candidate-2", "Jose": "candidate-3"}
-
-
-	//check cookie
-	function readCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+$(document).ready(async function () {
+    if (typeof window.ethereum === 'undefined') {
+        alert("Please install MetaMask to vote.");
+        return;
     }
-    return null;
-	}
 
-	var aadhaar_list = {
-		"300000000000" : "Akola",
-		"738253790005" : "Bhandara"
-	}
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    const signer = provider.getSigner();
 
-	var aadhaar = readCookie('aadhaar');
+    const contractAddress = "0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8"; 
+    const abi = [[
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32[]",
+					"name": "candidateNames",
+					"type": "bytes32[]"
+				},
+				{
+					"internalType": "uint256",
+					"name": "durationInSeconds",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "nonpayable",
+			"type": "constructor"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "candidateList",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "getWinner",
+			"outputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"name": "hasVoted",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "candidate",
+					"type": "bytes32"
+				}
+			],
+			"name": "totalVotesFor",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "candidate",
+					"type": "bytes32"
+				}
+			],
+			"name": "validCandidate",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "",
+					"type": "bool"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "candidate",
+					"type": "bytes32"
+				}
+			],
+			"name": "voteForCandidate",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "bytes32",
+					"name": "",
+					"type": "bytes32"
+				}
+			],
+			"name": "votesReceived",
+			"outputs": [
+				{
+					"internalType": "uint8",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "votingDeadline",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		}
+	]];
+    const contract = new ethers.Contract(contractAddress, abi, signer);
 
-	console.log(aadhaar);
-	var address = aadhaar_list[aadhaar];
-	console.log(address);
-	$('#loc_info').text('Location based on Aadhaar : '+ address)
+    function disableButtons() {
+        $('#vote1').prop("disabled", true);
+        $('#vote2').prop("disabled", true);
+        $('#vote3').prop("disabled", true);
+        $('#vote4').prop("disabled", true);
+        $('#vote-status').text("You have already voted or voting period ended.");
+    }
 
-	function disable() {
-			$('#vote1').addClass( "disabled" );
-		    $('#vote2').addClass( "disabled" );
-		    $('#vote3').addClass( "disabled" );
-		    $('#vote4').addClass( "disabled" );
-		    
-		    //logout
-		    document.cookie = "show=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC";
-		    document.cookie = "aadhaar=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC";
-		    window.location = '/app';
+    async function handleVote(candidateName, candidateHex) {
+        try {
+            const deadline = await contract.votingDeadline();
+            const now = Math.floor(Date.now() / 1000);
+            if (now > deadline) {
+                $('#vote-status').text("Voting has ended.");
+                disableButtons();
+                return;
+            }
 
+            const hasVoted = await contract.hasVoted(await signer.getAddress());
+            if (hasVoted) {
+                $('#vote-status').text("You have already voted.");
+                disableButtons();
+                return;
+            }
 
-	}
+            const tx = await contract.voteForCandidate(candidateHex);
+            await tx.wait();
+            $('#vote-status').text(`Vote submitted for ${candidateName}!`);
+            disableButtons();
+        } catch (err) {
+            console.error(err);
+            $('#vote-status').text("Error: " + err.message);
+        }
+    }
 
-	$('#vote1').click(function(){
-		contractInstance.voteForCandidate('Sanat', {from: web3.eth.accounts[0]}, function() {
-		    alert('vote submited to Sanat');
-		    disable();
-		    $('#loc_info').text('Vote submited successfully to Sanat')
-
-		});
-	})
-	$('#vote2').click(function(){
-		contractInstance.voteForCandidate('Aniket', {from: web3.eth.accounts[0]}, function() {
-		    alert('vote submited to Aniket');
-		     disable();
-		     $('#loc_info').text('Vote submited successfully to Aniket')
-		});
-	})
-	$('#vote3').click(function(){
-		contractInstance.voteForCandidate('Mandar', {from: web3.eth.accounts[0]}, function() {
-		    alert('vote submited to Mandar');
-		     disable();
-		      
-		      $('#loc_info').text('Vote submited successfully to Mandar')
-		});
-	})
-	$('#vote4').click(function(){
-		contractInstance.voteForCandidate('Akshay', {from: web3.eth.accounts[0]}, function() {
-		    alert('vote submited to Akshay');
-		     disable();
-		     $('#loc_info').text('Vote submited successfully to Akshay')
-		});
-	})
+    $('#vote1').click(() => handleVote("Alice", ethers.utils.formatBytes32String("Alice")));
+    $('#vote2').click(() => handleVote("Bob", ethers.utils.formatBytes32String("Bob")));
+    $('#vote3').click(() => handleVote("Cathy", ethers.utils.formatBytes32String("Cathy")));
+    $('#vote4').click(() => handleVote("Daniel", ethers.utils.formatBytes32String("Daniel")));
 });

@@ -1,8 +1,5 @@
 const users = {
-	alice: "1234",
-	bob: "1234",
-	cathy: "1234",
-	Daniel: "1234"
+	admin: "1234"
   };
   
   $(document).ready(function () {
@@ -27,7 +24,7 @@ const users = {
 	await provider.send("eth_requestAccounts", []);
 	const signer = provider.getSigner();
   
-	const contractAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+	const contractAddress = "0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8";
 	const abi = [[
 		{
 			"inputs": [
@@ -180,6 +177,7 @@ const users = {
 			"type": "function"
 		}
 	]];
+	
   
 	const contract = new ethers.Contract(contractAddress, abi, signer);
   
