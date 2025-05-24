@@ -9,6 +9,7 @@
         <link href="css/animate.css" rel="stylesheet">
         <link href="css/style.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     </head>
     <body class="gray-bg">
         <div class="middle-box text-center loginscreen animated fadeInDown">
@@ -34,18 +35,20 @@
 				    <a href="" class="close" data-dismiss="alert">&times;</a>
 				    <strong id="errormsg">Error!</strong> 
 				</div>
+
             </div>
         </div>
-        <div class="footer">
-            <ul class="class   copy-right">
-                <div>
-                  <p align="center">Made with <i class="fa fa-heart" style="color:red;"></i> by Techdot</p>
-                </div>
-                
-               
-            </ul>
-            
+
+        <div id="votingBox" style="display: none;" class="text-center">
+            <h3>Cast your vote</h3>
+            <button class="btn btn-success m-2" onclick="vote('0x416c696365000000000000000000000000000000000000000000000000000000')">Vote for Alice</button>
+            <button class="btn btn-success m-2" onclick="vote('0x426f620000000000000000000000000000000000000000000000000000000000')">Vote for Bob</button>
+            <p id="vote-status" class="text-info mt-3"></p>
         </div>
+        
+        
+
+
         <!-- Mainly scripts -->
 <script
   src="https://code.jquery.com/jquery-3.3.1.min.js"
