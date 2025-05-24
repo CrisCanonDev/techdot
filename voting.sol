@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 // We have to specify what version of compiler this code will compile with
 
@@ -26,11 +27,11 @@ contract Voting {
   deploy the contract to the blockchain. When we deploy the contract,
   we will pass an array of candidates who will be contesting in the election
   */
-  constructor(bytes32[] memory candidateNames, uint durationInSeconds) {
+  constructor(bytes32[] memory candidateNames, uint durationInHours) {
     candidateList = candidateNames;
 
     //deadline
-    votingDeadline = block.timestamp + durationInSeconds;
+    votingDeadline = block.timestamp + durationInHours;
   }
 
   // This function returns the total votes a candidate has received so far
@@ -77,6 +78,11 @@ contract Voting {
     return winner;
   }
 
+  //get remaining time left
+  function timeLeft() public view returns (uint) {
+    if (block.timestamp >= votingDeadline) return 0;
+    return votingDeadline - block.timestamp;
+}
 
 
 }
