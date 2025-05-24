@@ -14,8 +14,7 @@ const users = {
   
 	  if (users[username] && users[username] === password) {
 		$('#messagebox').hide();
-		$('.loginscreen').hide();
-		$('#votingBox').show();
+		window.location.href = "clist.html";
 	  } else {
 		$('#messagebox').show();
 		$('#errormsg').text("Invalid username or password.");
