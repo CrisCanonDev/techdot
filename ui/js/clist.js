@@ -1,8 +1,8 @@
 $(document).ready(async function () {
-    if (typeof window.ethereum === 'undefined') {
-        alert("Please install MetaMask to vote.");
-        return;
-    }
+    //if (typeof window.ethereum === 'undefined') {
+        //alert("Please install MetaMask to vote.");
+        //return;
+    //}
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
